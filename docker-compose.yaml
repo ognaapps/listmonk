@@ -1,0 +1,57 @@
+networks:
+  listmonk_net:
+  ogna:
+    external: true
+
+volumes:
+  listmonk_app_data:
+  postgres_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /mnt/volume-db/listmonk/postgress
+      o: bind
+
+services:
+  postgres_listmonk:
+    image: postgres:15
+    hostname: postgres_listmonk
+    restart: unless-stopped
+    networks:
+      - listmonk_net
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+      start_period: 10s
+
+  listmonk:
+    image: llistmonk/listmonk:latest
+    container_name: listmonk_app
+    restart: unless-stopped
+    depends_on:
+      postgres_listmonk:
+        condition: service_healthy
+    env_file:
+      - .env
+    expose:
+      - "9000"
+    volumes:
+      - ./uploads:/listmonk/uploads:rw
+    networks:
+      - ogna
+      - listmonk_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.listmonk.rule=Host(`listmonk.${OGNA_USER}.${OGNA_HOST}`)"
+      - "traefik.http.routers.listmonk.entrypoints=websecure"
+      - "traefik.http.services.listmonk.loadbalancer.server.port=9000"
+      - "traefik.docker.network=ogna"
+      - "traefik.http.routers.listmonk.tls.certresolver=hetzner"
