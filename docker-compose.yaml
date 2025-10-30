@@ -33,7 +33,7 @@ services:
       start_period: 10s
 
   listmonk:
-    image: llistmonk/listmonk:latest
+    image: listmonk/listmonk:latest
     container_name: listmonk_app
     restart: unless-stopped
     depends_on:
