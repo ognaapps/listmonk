@@ -11,6 +11,12 @@ volumes:
       type: none
       device: /mnt/volume-db/listmonk/postgress
       o: bind
+  uploads:
+    driver: local
+    driver_opts:
+      type: none
+      device: /mnt/volume-db/listmonk/uploads
+      o: bind
 
 services:
   postgres_listmonk:
@@ -44,7 +50,7 @@ services:
     expose:
       - "9000"
     volumes:
-      - ./uploads:/listmonk/uploads:rw
+      - uploads:/listmonk/uploads
     networks:
       - ogna
       - listmonk_net
