@@ -61,3 +61,10 @@ services:
       - "traefik.http.services.listmonk.loadbalancer.server.port=9000"
       - "traefik.docker.network=ogna"
       - "traefik.http.routers.listmonk.tls.certresolver=hetzner"
+    hostname: "listmonk.${OGNA_USER}.${OGNA_HOST}"
+    command:
+      [
+        sh,
+        -c,
+        "./listmonk --install --idempotent --yes --config '' && ./listmonk --upgrade --yes --config '' && ./listmonk --config ''",
+      ]
